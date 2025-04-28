@@ -37,7 +37,7 @@ Homify is a full-stack hotel and stay booking platform inspired by modern bookin
 ### 2. Install the Dependencies
 
 ### 3.Configure Environment Variables
-<pre>```env
+<pre>
 SECRET=yourSessionSecret
 ATLASDB_URL=yourMongoDBAtlasURL
 MAP_TOKEN=yourMapboxAccessToken
@@ -45,8 +45,8 @@ MAP_TOKEN=yourMapboxAccessToken
 CLOUD_NAME=yourCloudinaryCloudName
 CLOUD_API_KEY=yourCloudinaryAPIKey
 CLOUD_API_SECRET=yourCloudinaryAPISecret
-```env</pre>
+</pre>
 
 ### 4.Run the Server
-<pre> ``` node app.js ``` </pre>>
+<pre>node app.js</pre>>
 
