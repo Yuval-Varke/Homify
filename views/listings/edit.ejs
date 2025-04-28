@@ -1,0 +1,264 @@
+<%layout("/layouts/boilerplate") %>
+<div class="row mt-3">
+  <div class="col-8 offset-2">
+    <br/>
+    <h3>Edit your Listing</h3>
+    <form method="POST" action="/listings/<%= listing._id %>?_method=PUT" novalidate class="needs-validation" enctype="multipart/form-data">
+      <div class="mb-3">
+        <label for="title" class="form-label">Title</label>
+        <input name="listing[title]" value="<%= listing.title %>" type="text" class="form-control" required/>
+        <div class="invalid-feedback">Please provide a title.</div>
+        <div class="valid-feedback">Looks good!</div>
+      </div>
+
+      <div class="mb-3">
+        <label for="description" class="form-label">Description</label>
+        <textarea class="form-control" name="listing[description]" required><%= listing.description %></textarea>
+        <div class="invalid-feedback">Please provide a Description.</div>
+        <div class="valid-feedback">Looks good!</div> 
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Current Images</label>
+        <div class="row g-3">
+          <% if (listing.image && listing.image.length > 0) { %>
+            <% for(let i = 0; i < listing.image.length; i++) { %>
+              <div class="col-md-4">
+                <div class="image-card">
+                  <div class="image-preview">
+                    <img src="<%= listing.image[i].url %>" class="img-fluid" alt="Listing image">
+                    <div class="image-overlay">
+                      <div class="form-check delete-option">
+                        <input class="form-check-input" type="checkbox" 
+                        name="listing[deleteImages][]" 
+                        value="<%= listing.image[i].filename %>" 
+                        id="deleteImage<%= i %>"
+                        <%= listing.image.length === 1 ? 'disabled' : '' %>>
+                      <label class="form-check-label" for="deleteImage<%= i %>">
+                          <i class="fas fa-trash-alt"></i>
+                          <%= listing.image.length === 1 ? '(Cannot delete last image)' : 'Delete image' %>
+                      </label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            <% } %>
+          <% } else { %>
+            <div class="col-12">
+              <div class="no-images-message">
+                <i class="fas fa-images"></i>
+                <p>No images uploaded yet</p>
+              </div>
+            </div>
+          <% } %>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Add New Images</label>
+        <div id="image-upload-container">
+          <div class="image-upload-field mb-2">
+            <input type="file" class="form-control" name="listing[image][url]" accept="image/*">
+            <div class="invalid-feedback">Please upload a valid image.</div>
+            <div class="valid-feedback">Looks good!</div>
+          </div>
+        </div>
+        <button type="button" class="btn btn-primary btn-sm mt-2" id="add-image-btn">Add Another Image</button>
+        <button type="button" class="btn btn-danger btn-sm mt-2 ms-2" id="remove-image-btn" style="display: none;">Remove Last Image</button>
+      </div>
+
+      <div class="row">
+        <div class="mb-3 col-md-4">
+          <label for="price" class="form-label">Price per Night (₹)</label>
+          <input name="listing[price]" value="<%= listing.price %>" type="number" class="form-control" min="0" required/>
+          <div class="invalid-feedback">Provide a valid Price.</div>
+          <div class="valid-feedback">Looks good!</div>  
+        </div>
+
+        <div class="mb-3 col-md-8">
+          <label for="country" class="form-label">Country</label>
+          <input name="listing[country]" value="<%= listing.country %>" type="text" class="form-control" required/>
+          <div class="invalid-feedback">Provide a valid Country.</div>
+          <div class="valid-feedback">Looks good!</div>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label for="location" class="form-label">Location</label>
+        <input name="listing[location]" value="<%= listing.location %>" type="text" class="form-control" required/>
+        <div class="invalid-feedback">Provide a valid Location.</div>
+        <div class="valid-feedback">Looks good!</div>
+      </div>
+
+      <div class="mb-3">
+        <label for="category" class="form-label">Category</label>
+        <select name="listing[category]" id="category" class="form-select" required>
+          <option value="" disabled>Select a Category</option>
+          <option value="Trending" <%= listing.category === 'Trending' ? 'selected' : '' %>>Trending</option>
+          <option value="Peaceful" <%= listing.category === 'Peaceful' ? 'selected' : '' %>>Peaceful</option>
+          <option value="Mountains" <%= listing.category === 'Mountains' ? 'selected' : '' %>>Mountains</option>
+          <option value="Beach" <%= listing.category === 'Beach' ? 'selected' : '' %>>Beach</option>
+          <option value="Nature" <%= listing.category === 'Nature' ? 'selected' : '' %>>Nature</option>
+          <option value="Arctic" <%= listing.category === 'Arctic' ? 'selected' : '' %>>Arctic</option>
+          <option value="Village" <%= listing.category === 'Village' ? 'selected' : '' %>>Village</option>
+          <option value="Royal" <%= listing.category === 'Royal' ? 'selected' : '' %>>Royal</option>
+          <option value="Homely" <%= listing.category === 'Homely' ? 'selected' : '' %>>Homely</option>
+          <option value="Suburban" <%= listing.category === 'Suburban' ? 'selected' : '' %>>Suburban</option>
+          <option value="Desert" <%= listing.category === 'Desert' ? 'selected' : '' %>>Desert</option>
+        </select>
+        <div class="invalid-feedback">Please select a Category.</div>
+        <div class="valid-feedback">Looks good!</div>
+      </div>
+
+      <button class="btn btn-success mb-3 mt-3">Update Listing</button>
+    </form>
+    <br/>
+  </div> 
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const imageContainer = document.getElementById('image-upload-container');
+    const addImageBtn = document.getElementById('add-image-btn');
+    const removeImageBtn = document.getElementById('remove-image-btn');
+    const deleteCheckboxes = document.querySelectorAll('.delete-checkbox');
+    let imageCount = 1;
+
+    // Prevent deleting all images
+    deleteCheckboxes.forEach(checkbox => {
+      checkbox.addEventListener('change', function() {
+        const checkedBoxes = document.querySelectorAll('.delete-checkbox:checked');
+        const totalImages = document.querySelectorAll('.delete-checkbox').length;
+        
+        if (checkedBoxes.length >= totalImages - 1) {
+          // If only one image would remain, disable the last checkbox
+          deleteCheckboxes.forEach(cb => {
+            if (!cb.checked) {
+              cb.disabled = true;
+            }
+          });
+        } else {
+          // Re-enable all checkboxes if more than one image would remain
+          deleteCheckboxes.forEach(cb => {
+            cb.disabled = false;
+          });
+        }
+      });
+    });
+
+    addImageBtn.addEventListener('click', function() {
+      const newField = document.createElement('div');
+      newField.className = 'image-upload-field mb-2';
+      newField.innerHTML = `
+        <input type="file" class="form-control" name="listing[image][url]" accept="image/*">
+        <div class="invalid-feedback">Please upload a valid image.</div>
+        <div class="valid-feedback">Looks good!</div>
+      `;
+      imageContainer.appendChild(newField);
+      imageCount++;
+      removeImageBtn.style.display = 'inline-block';
+    });
+
+    removeImageBtn.addEventListener('click', function() {
+      if (imageCount > 1) {
+        imageContainer.removeChild(imageContainer.lastChild);
+        imageCount--;
+      }
+      if (imageCount <= 1) {
+        removeImageBtn.style.display = 'none';
+      }
+    });
+  });
+</script>
+
+<style>
+  .image-card {
+    position: relative;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease-in-out;
+  }
+
+  .image-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  }
+
+  .image-preview {
+    position: relative;
+    padding-top: 75%; /* 4:3 Aspect Ratio */
+    background-color: #f8f9fa;
+  }
+
+  .image-preview img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .image-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
+  }
+
+  .image-card:hover .image-overlay {
+    opacity: 1;
+  }
+
+  .delete-option {
+    background: white;
+    padding: 0.5rem 1rem;
+    border-radius: 0.25rem;
+    margin: 0;
+  }
+
+  .delete-option .form-check-input {
+    margin-right: 0.5rem;
+  }
+
+  .delete-option .form-check-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #dc3545;
+    cursor: pointer;
+  }
+
+  .delete-option .form-check-label i {
+    font-size: 1rem;
+  }
+
+  .no-images-message {
+    text-align: center;
+    padding: 2rem;
+    background-color: #f8f9fa;
+    border-radius: 0.5rem;
+    color: #6c757d;
+  }
+
+  .no-images-message i {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+  }
+
+  .no-images-message p {
+    margin: 0;
+    font-size: 1.1rem;
+  }
+</style>
+
+  
