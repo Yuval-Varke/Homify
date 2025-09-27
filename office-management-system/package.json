@@ -1,0 +1,27 @@
+{
+  "name": "office-management-system",
+  "version": "1.0.0",
+  "description": "An online office management system.",
+  "main": "src/server/index.js",
+  "scripts": {
+    "start": "node src/server/index.js",
+    "build": "tsc",
+    "dev": "nodemon src/server/index.ts"
+  },
+  "dependencies": {
+    "express": "^4.17.1",
+    "mongoose": "^5.10.9",
+    "cors": "^2.8.5",
+    "dotenv": "^8.2.0",
+    "jsonwebtoken": "^8.5.1",
+    "bcryptjs": "^2.4.3"
+  },
+  "devDependencies": {
+    "typescript": "^4.1.2",
+    "nodemon": "^2.0.4",
+    "@types/express": "^4.17.8",
+    "@types/node": "^14.14.6"
+  },
+  "author": "Your Name",
+  "license": "MIT"
+}

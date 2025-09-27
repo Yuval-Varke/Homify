@@ -1,0 +1,14 @@
+// src/client/components/employees/index.tsx
+
+import React from 'react';
+
+const Employees: React.FC = () => {
+    return (
+        <div>
+            <h1>Employee Management</h1>
+            {/* Add employee management functionalities here */}
+        </div>
+    );
+};
+
+export default Employees;

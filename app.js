@@ -33,8 +33,8 @@ app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.use(methodOverride("_method"));
-app.engine("ejs", ejsMate);
+app.use(methodOverride("_method")); 
+app.engine("ejs", ejsMate); 
 app.use(express.static(path.join(__dirname, "public")));
 
 
@@ -46,7 +46,7 @@ const store=MongoStore.create({
   touchAfter:24*3600, 
 })
 
-store.on("error",(err)=>{
+store.on("error",(err)=>{ 
   console.log("Session store error",err)
 ;
 })
@@ -65,6 +65,8 @@ const sessionOptions={
 // app.get("/",async (req,res)=>{
 //   res.send("HEllo world")
 // })
+
+
 
 app.use(session(sessionOptions))
 app.use(flash())
