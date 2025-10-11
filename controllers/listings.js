@@ -36,20 +36,40 @@ module.exports.createListing = async (req, res) => {
   const newListing = new Listing(req.body.listing);
   newListing.owner = req.user._id;
   
-  // Handle multiple images
+  // Handle multiple images: upload buffer directly to Cloudinary
+  const { cloudinary } = require("../cloudconfig.js");
+  newListing.image = [];
   if (req.files && req.files.length > 0) {
-    newListing.image = req.files.map(file => ({
-      url: file.path,
-      filename: file.filename
-    }));
-  } else if (req.file) {
-    // Fallback for single file upload
-    newListing.image = [{
-      url: req.file.path,
-      filename: req.file.filename
-    }];
+    for (const file of req.files) {
+      const result = await cloudinary.uploader.upload_stream({
+        folder: "Homify_DEV"
+      }, (error, result) => {
+        if (error) throw error;
+        return result;
+      });
+      // Use a Promise to handle the stream
+      await new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream({ folder: "Homify_DEV" }, (error, result) => {
+          if (error) return reject(error);
+          newListing.image.push({ url: result.secure_url, filename: result.public_id });
+          resolve();
+        });
+        stream.end(file.buffer);
+      });
+    }
   }
 
+  // Fallback for single file upload
+  if (req.file && (!req.files || req.files.length === 0)) {
+    await new Promise((resolve, reject) => {
+      const stream = cloudinary.uploader.upload_stream({ folder: "Homify_DEV" }, (error, result) => {
+        if (error) return reject(error);
+        newListing.image.push({ url: result.secure_url, filename: result.public_id });
+        resolve();
+      });
+      stream.end(req.file.buffer);
+    });
+  }
   newListing.geometry = response.body.features[0].geometry;
   await newListing.save();
   req.flash("success", "Successfully created a new listing!");

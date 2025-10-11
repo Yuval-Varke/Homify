@@ -7,9 +7,7 @@ const {isOwner}=require("../middleware.js")
 const {validateListing}=require("../middleware.js")
 const listingController = require("../controllers/listings.js")
 const multer  = require('multer')
-const {storage}=require("../cloudconfig.js")
-
-const upload = multer({ storage: storage })
+const upload = require("../utils/multerMemory.js")
 
 
 
