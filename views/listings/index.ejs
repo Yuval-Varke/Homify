@@ -512,7 +512,11 @@
         <a href="/listings/<%= listing._id %>" class="listing-link">
           <div class="listing-card">
             <div class="listing-img-wrapper">
-              <img src="<%= listing.image[0].url %>" class="listing-img" alt="Listing image">
+          <% if (listing.image && listing.image.length > 0) { %>
+            <img src="<%= listing.image[0].url %>" class="listing-img" alt="Listing image">
+          <% } else { %>
+            <img src="/images/default.jpg" class="listing-img" alt="Default image">
+          <% } %>
               <div class="heart-icon">
                 <i class="fa-regular fa-heart"></i>
               </div>
