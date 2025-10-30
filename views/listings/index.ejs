@@ -42,52 +42,108 @@
       }
       
       .filter > div {
-          font-size: 1.1rem;
+          font-size: 2rem;
           color: #3b82f6;
           display: flex;
           align-items: center;
           justify-content: center;
-          height: 1.8rem;
+          height: 2.5rem;
           margin-bottom: 0.3rem;
           flex: 1;
-          padding: 0.2rem 0;
+          padding: 0.2rem 0.4;
       }
       
       .filter > p {
-          margin-top: 0;
+          margin-top: 8px;
           font-size: 0.65rem;
           font-weight: 600;
           color: #374151;
           line-height: 1;
           flex: 0;
-          padding-bottom: 0.1rem;
+          padding-bottom: 0rem;
       }
       
       .tax-toggle {
-          border: 2px solid #d1d5db;
-          border-radius: 50px;
-          padding: 0.5rem 1rem;
-          height: auto;
-          display: flex;
-          align-items: center;
-          background-color: #f1f5f9;
-          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-          transition: background-color 0.3s, box-shadow 0.3s;
-          flex-shrink: 0;
-          white-space: nowrap;
-          font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        background: #f7f7f7;
+        border-radius: 999px;
+        padding: 0.5rem 1.5rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+        border: 1.5px solid #e5e7eb;
+        font-size: 1rem;
+        font-weight: 500;
+        transition: background 0.2s, border 0.2s;
+        margin-left: 1rem;
       }
       
+      .tax-label {
+        color: #222;
+        font-weight: 500;
+        transition: color 0.2s;
+      }
+
+      .tax-switch {
+        position: relative;
+        width: 48px;
+        height: 28px;
+        display: inline-block;
+      }
+
+      .tax-switch input[type="checkbox"] {
+        opacity: 0;
+        width: 48px;
+        height: 28px;
+        cursor: pointer;
+        position: absolute;
+        left: 0; top: 0;
+        z-index: 2;
+      }
+
+      .tax-slider {
+        position: absolute;
+        top: 6px; left: 0;
+        width: 48px;
+        height: 24px;
+        background: #ddd;
+        border-radius: 999px;
+        transition: background 0.2s;
+      }
+
+      .tax-switch input:checked + .tax-slider {
+        background: #34d399;
+      }
+
+      .tax-slider::before {
+        content: "";
+        position: absolute;
+        left: 4px;
+        top: 4px;
+        width: 20px;
+        height: 16px;
+        background: #fff;
+        border-radius: 50%;
+        transition: transform 0.2s;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.10);
+      }
+
+      .tax-switch input:checked + .tax-slider::before {
+        transform: translateX(20px);
+      }
+
+      .tax-toggle.active {
+        background: #e6f7f2;
+        border-color: #34d399;
+      }
       .tax-toggle:hover {
-          background-color: #e5e7eb;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-          cursor: pointer;
+        background: #e6f7f2;
+        border-color: #34d399;
       }
-      
-      #tax-info {
-          display: none;
-          transition: opacity 0.3s ease;
-          font-style: italic;
+
+      .tax-toggle.active .tax-label {
+        color: #059669;
+        font-weight: 400;
       }
       
       .form-check-reverse {
@@ -158,18 +214,19 @@
           text-shadow: 0 0 12px rgba(239, 68, 68, 0.6);
       }
 
-      @keyframes heartBeat {
-          0% { transform: scale(1); }
-          25% { transform: scale(1.4); }
-          50% { transform: scale(1); }
-          75% { transform: scale(1.4); }
-          100% { transform: scale(1); }
+      @keyframes heartPulse {
+        0% { transform: scale(1); filter: drop-shadow(0 0 0px #ff385c); }
+        10% { transform: scale(1.4); filter: drop-shadow(0 0 10px #ff385c); }
+        20% { transform: scale(0.95); filter: drop-shadow(0 0 6px #ff385c); }
+        30% { transform: scale(1.2); filter: drop-shadow(0 0 16px #ff385c); }
+        40% { transform: scale(1); filter: drop-shadow(0 0 8px #ff385c); }
+        50% { transform: scale(1.3); filter: drop-shadow(0 0 20px #ff385c); }
+        60% { transform: scale(1); filter: drop-shadow(0 0 8px #ff385c); }
+        100% { transform: scale(1); filter: drop-shadow(0 0 0px #ff385c); }
       }
 
-      @keyframes pulse {
-          0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
-          50% { box-shadow: 0 0 0 15px rgba(239, 68, 68, 0.3); }
-          100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+      .heart-icon i.pulse {
+        animation: heartPulse 0.7s cubic-bezier(0.4, 0, 0.2, 1);
       }
 
       .heart-icon.liked {
@@ -325,15 +382,26 @@
           color: #ccc;
       }
 
-      [data-theme="dark"] .tax-toggle {
-          background-color: #3d3d3d;
-          border-color: #444;
+      [data-theme="dark"] .tax-label{
           color: #fff;
       }
 
-      [data-theme="dark"] .tax-toggle:hover {
-          background-color: #444;
+      [data-theme="dark"] #switchCheckDefault:checked + .tax-slider + .tax-label {
+    font-weight: 600;
+}
+
+
+      [data-theme="dark"] .tax-toggle {
+          background-color: #3d3d3d;
+          border-color: #444;
+          color: #ccc;
       }
+
+      [data-theme="dark"] .tax-toggle:hover {
+          border-color: #2ecc71;
+      }
+
+     
 
       [data-theme="dark"] .form-check-label {
           color: #fff;
@@ -414,6 +482,125 @@
 
       [data-theme="dark"] .card-link:hover {
           color: #27ae60;
+      }
+
+      .listing-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 32px;
+        padding: 32px 0;
+        max-width: 1400px;
+        margin: 0 auto;
+      }
+      .listing-card {
+        background: #fff;
+        border-radius: 20px;
+        box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+        overflow: hidden;
+        transition: box-shadow 0.2s, transform 0.2s;
+        text-decoration: none;
+        color: inherit;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        min-height: 420px;
+      }
+      .listing-card:hover {
+        box-shadow: 0 8px 32px rgba(0,0,0,0.16);
+        transform: translateY(-4px) scale(1.01);
+      }
+      .listing-image-container {
+        position: relative;
+        width: 100%;
+        aspect-ratio: 4/3;
+        background: #eee;
+        overflow: hidden;
+      }
+      .listing-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+        border-radius: 20px 20px 0 0;
+        transition: transform 0.3s;
+      }
+      .listing-card:hover .listing-image {
+        transform: scale(1.04);
+      }
+      .heart-icon {
+        position: absolute;
+        top: 16px;
+        right: 16px;
+        background: rgba(255,255,255,0.95);
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+        z-index: 2;
+        transition: background 0.2s, transform 0.2s;
+      }
+      .heart-icon:hover {
+        background: #fff;
+        transform: scale(1.1);
+      }
+      .heart-icon i {
+        color: #FF385C;
+        font-size: 20px;
+      }
+      .listing-details {
+        padding: 20px 20px 16px 20px;
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        gap: 6px;
+      }
+      .listing-location {
+        font-weight: 600;
+        font-size: 1.08rem;
+        color: #717171;
+        margin-bottom: 2px;
+      }
+      .listing-title {
+        font-size: 1rem;
+        color: #222;
+        font-weight: 400;
+        margin-bottom: 2px;
+        line-height: 1.2;
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+      .listing-price {
+        font-size: 1.08rem;
+        color: #222;
+        margin-top: 8px;
+      }
+      .listing-price strong {
+        font-weight: 600;
+      }
+      .tax-info {
+        font-size: 0.95rem;
+        color: #717171;
+        margin-top: 2px;
+        display: none; 
+      }
+      @media (max-width: 700px) {
+        .listing-grid {
+          grid-template-columns: 1fr;
+          gap: 20px;
+          padding: 12px 0;
+        }
+        .listing-card {
+          min-height: 340px;
+        }
+        .listing-details {
+          padding: 14px 12px 12px 12px;
+        }
       }
     </style>
       
@@ -496,98 +683,64 @@
       </div>
       </a>
       
-      <div class="tax-toggle">
-        <div class="form-check-reverse form-switch">
-          <label class="form-check-label" for="switchCheckDefault">With Taxes</label>
-          <input class="form-check-input" type="checkbox" role="switch" id="switchCheckDefault">
-        </div>
+      <div class="tax-toggle" id="taxToggle">
+        <span class="tax-label">With Taxes</span>
+        <label class="tax-switch">
+          <input type="checkbox" id="switchCheckDefault">
+          <span class="tax-slider"></span>
+        </label>
       </div>
      </div>
     <!-- <form method="GET" action="/listings/new">
       <button>Create New Listing</button>
     </form> -->
-    <div class="row row-cols-lg-3 row-cols-md-2 row-cols-sm-1 mt-3">
+    <div class="listing-grid">
     <% for(let listing of allListings) { %>
-      <div class="col mb-4">
-        <a href="/listings/<%= listing._id %>" class="listing-link">
-          <div class="listing-card">
-            <div class="listing-img-wrapper">
-          <% if (listing.image && listing.image.length > 0) { %>
-            <img src="<%= listing.image[0].url %>" class="listing-img" alt="Listing image">
-          <% } else { %>
-            <img src="/images/default.jpg" class="listing-img" alt="Default image">
-          <% } %>
-              <div class="heart-icon">
-                <i class="fa-regular fa-heart"></i>
-              </div>
-            </div>
-            <div class="listing-body">
-              <div class="listing-title"><b><%= listing.title %></b></div>
-              <div class="listing-location"><%= listing.location %></div>
-              <div class="listing-price">
-                &#8377;<%= listing.price.toLocaleString("en-IN") %> 
-                <i id="tax-info">&nbsp; +18% GST (+ extra amenities)</i>
-              </div>
-            </div>
+      <a href="/listings/<%= listing._id %>" class="listing-card">
+        <div class="listing-image-container">
+          <img src="<%= listing.image[0].url %>" class="listing-image" alt="<%= listing.title %>">
+          <div class="heart-icon">
+            <i class="fa-regular fa-heart"></i>
           </div>
-        </a>
-      </div>
-      
+        </div>
+        <div class="listing-details">
+          <div class="listing-title"><strong><b><%= listing.title %></b></strong></div>
+          <div class="listing-location"><%= listing.location %></div>
+          <div class="listing-price">
+            <strong>₹<%= listing.price.toLocaleString("en-IN") %></strong> /Night
+          </div>
+          <div class="tax-info" id="tax-info">+18% GST (+ extra amenities)</div>
+        </div>
+      </a>
     <% } %>
     </div>
 
     <script>
-      let taxSwitch = document.getElementById("switchCheckDefault");
-    
-      taxSwitch.addEventListener("click", () => {
+      const taxSwitch = document.getElementById("switchCheckDefault");
+      const taxToggle = document.getElementById("taxToggle");
+      taxSwitch.addEventListener("change", () => {
+        taxToggle.classList.toggle("active", taxSwitch.checked);
+        // Show/hide tax info
         let taxInfos = document.querySelectorAll("#tax-info");
-    
         taxInfos.forEach(info => {
-          if (info.style.display !== "inline") {
-            info.style.display = "inline";
-          } else {
-            info.style.display = "none";
-          }
+          info.style.display = taxSwitch.checked ? "inline" : "none";
         });
       });
-
+      // Heart icon functionality (unchanged)
       const heartIcons = document.querySelectorAll(".heart-icon i");
-
-heartIcons.forEach((icon, index) => {
-  const isLiked = localStorage.getItem(`heart-${index}`) === "true";
-        const heartContainer = icon.parentElement;
-        
-  if (isLiked) {
-    icon.classList.add("fa-solid");
-    icon.classList.remove("fa-regular");
-          icon.style.color = "#ef4444";
-  }
-});
-
-heartIcons.forEach((icon, index) => {
-  icon.addEventListener("click", (e) => {
+      heartIcons.forEach((icon, index) => {
+        const isLiked = localStorage.getItem(`heart-${index}`) === "true";
+        if (isLiked) {
+          icon.classList.add("fa-solid");
+          icon.classList.remove("fa-regular");
+        }
+        icon.addEventListener("click", (e) => {
           e.preventDefault();
           e.stopPropagation();
-
-          const heartContainer = icon.parentElement;
           const isLiked = icon.classList.toggle("fa-solid");
-    
-    icon.classList.toggle("fa-regular");
-          if (isLiked) {
-            icon.style.color = "#ef4444";
-          } else {
-            icon.style.color = "#374151";
-          }
-          
-          // Add animation classes
-          heartContainer.classList.add("liked");
-
-          // Remove animation classes after animation completes
-          setTimeout(() => {
-            heartContainer.classList.remove("liked");
-          }, 800);
+          icon.classList.toggle("fa-regular");
           localStorage.setItem(`heart-${index}`, isLiked);
-  });
-});
+        });
+      });
     </script>
     

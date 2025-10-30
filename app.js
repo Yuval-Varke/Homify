@@ -20,6 +20,7 @@ const passport=require("passport")
 const User=require("./models/user.js")
 const LocalStrategy=require("passport-local")
 
+
 const dbUrl=process.env.ATLASDB_URL
 async function main(){await mongoose.connect(dbUrl);};
 
@@ -33,8 +34,8 @@ app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.use(methodOverride("_method")); 
-app.engine("ejs", ejsMate); 
+app.use(methodOverride("_method"));
+app.engine("ejs", ejsMate);
 app.use(express.static(path.join(__dirname, "public")));
 
 
@@ -46,7 +47,7 @@ const store=MongoStore.create({
   touchAfter:24*3600, 
 })
 
-store.on("error",(err)=>{ 
+store.on("error",(err)=>{
   console.log("Session store error",err)
 ;
 })
@@ -65,8 +66,6 @@ const sessionOptions={
 // app.get("/",async (req,res)=>{
 //   res.send("HEllo world")
 // })
-
-
 
 app.use(session(sessionOptions))
 app.use(flash())
@@ -94,8 +93,9 @@ app.use((req,res,next)=>{
 //   let registeredUserr=await User.register(fakeUser,"password")
 //   res.send(registeredUserr)
 // })
+
 app.get('/', (req, res) => {
-  res.render('hero');
+  res.render('hero.ejs');
 });
 
 app.use("/listings", listingRouter); // /listings is the base route for all the routes in listing.js
@@ -108,7 +108,7 @@ app.all(/(.*)/, (req, res, next) => {
 
 app.use((err,req,res,next)=>{
   let{statusCode=500,message="Something went wrong"}=err;
-  res.status(statusCode).render("error.ejs",{message});
+   res.status(statusCode).render("error.ejs",{message});
   // res.status(statusCode).send(message);
 })
 

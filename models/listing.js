@@ -55,11 +55,7 @@ const listingSchema = new Schema({
       "Suburban",
       "Desert"],
     required: true,
-  },
-  likes: [{
-    type: Schema.Types.ObjectId,
-    ref: "User"
-  }]
+  }
 });
 
 listingSchema.post("findOneAndDelete", async (listing)=> {

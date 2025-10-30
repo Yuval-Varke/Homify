@@ -5,11 +5,11 @@ const geocodingClient = mbxGeocoding({ accessToken: mapToken });
 
 module.exports.index = async (req, res) => {
   const allListings = await Listing.find({});
-  res.render("listings/index.ejs", { allListings });
+  res.render("listings/index.ejs", {allListings });
 }
 
 module.exports.renderNewForm = (req, res) => {
-
+  // Check if the user is logged in before allowing them to create a new listing
   res.render("listings/new.ejs");
 }
 
@@ -36,40 +36,20 @@ module.exports.createListing = async (req, res) => {
   const newListing = new Listing(req.body.listing);
   newListing.owner = req.user._id;
   
-  // Handle multiple images: upload buffer directly to Cloudinary
-  const { cloudinary } = require("../cloudconfig.js");
-  newListing.image = [];
+  // Handle multiple images
   if (req.files && req.files.length > 0) {
-    for (const file of req.files) {
-      const result = await cloudinary.uploader.upload_stream({
-        folder: "Homify_DEV"
-      }, (error, result) => {
-        if (error) throw error;
-        return result;
-      });
-      // Use a Promise to handle the stream
-      await new Promise((resolve, reject) => {
-        const stream = cloudinary.uploader.upload_stream({ folder: "Homify_DEV" }, (error, result) => {
-          if (error) return reject(error);
-          newListing.image.push({ url: result.secure_url, filename: result.public_id });
-          resolve();
-        });
-        stream.end(file.buffer);
-      });
-    }
+    newListing.image = req.files.map(file => ({
+      url: file.path,
+      filename: file.filename
+    }));
+  } else if (req.file) {
+    // Fallback for single file upload
+    newListing.image = [{
+      url: req.file.path,
+      filename: req.file.filename
+    }];
   }
 
-  // Fallback for single file upload
-  if (req.file && (!req.files || req.files.length === 0)) {
-    await new Promise((resolve, reject) => {
-      const stream = cloudinary.uploader.upload_stream({ folder: "Homify_DEV" }, (error, result) => {
-        if (error) return reject(error);
-        newListing.image.push({ url: result.secure_url, filename: result.public_id });
-        resolve();
-      });
-      stream.end(req.file.buffer);
-    });
-  }
   newListing.geometry = response.body.features[0].geometry;
   await newListing.save();
   req.flash("success", "Successfully created a new listing!");
@@ -97,10 +77,10 @@ module.exports.updateListing = async (req, res) => {
     category: req.body.listing.category
   };
 
-  
+  // Get the current listing first
   const currentListing = await Listing.findById(id);
   
-  
+  // If location has changed, update the geometry
   if (currentListing.location !== listingData.location) {
     let response = await geocodingClient.forwardGeocode({
       query: listingData.location,
@@ -110,21 +90,21 @@ module.exports.updateListing = async (req, res) => {
     listingData.geometry = response.body.features[0].geometry;
   }
 
-  
+  // Handle images
   if (req.files && req.files.length > 0) {
-    
+    // If new images are uploaded, combine them with existing images
     const newImages = req.files.map(file => ({
       url: file.path,
       filename: file.filename
     }));
     
-    
+    // If there are images to delete, filter them out but ensure at least one remains
     if (req.body.listing.deleteImages) {
       const remainingImages = currentListing.image.filter(img => 
         !req.body.listing.deleteImages.includes(img.filename)
       );
       
-      
+      // Only update if we're not deleting all images
       if (remainingImages.length > 0 || newImages.length > 0) {
         currentListing.image = remainingImages;
       } else {
@@ -133,16 +113,16 @@ module.exports.updateListing = async (req, res) => {
       }
     }
     
-    
+    // Combine existing images with new ones
     listingData.image = [...currentListing.image, ...newImages];
   } else if (req.file) {
-    
+    // Single file upload case
     const newImage = {
       url: req.file.path,
       filename: req.file.filename
     };
     
-    
+    // If there are images to delete, filter them out but ensure at least one remains
     if (req.body.listing.deleteImages) {
       const remainingImages = currentListing.image.filter(img => 
         !req.body.listing.deleteImages.includes(img.filename)
@@ -157,15 +137,15 @@ module.exports.updateListing = async (req, res) => {
       }
     }
     
-    
+    // Combine existing images with new one
     listingData.image = [...currentListing.image, newImage];
   } else if (req.body.listing.deleteImages) {
-    
+    // Only deleting images, no new uploads
     const remainingImages = currentListing.image.filter(img => 
       !req.body.listing.deleteImages.includes(img.filename)
     );
     
-    
+    // Ensure at least one image remains
     if (remainingImages.length > 0) {
       listingData.image = remainingImages;
     } else {
@@ -173,7 +153,7 @@ module.exports.updateListing = async (req, res) => {
       return res.redirect(`/listings/${id}/edit`);
     }
   } else {
-    
+    // No image changes, keep existing images
     listingData.image = currentListing.image;
   }
 
@@ -209,43 +189,26 @@ module.exports.filterByCategory = async(req,res)=>{
 }
 
 module.exports.searchListings = async (req, res) => {
-  const { search } = req.query;
-  if (!search) {
-    return res.redirect("/listings");
-  }
-  
-  // Search in title, description, location, and country fields
-  const listings = await Listing.find({
-    $or: [
-      { title: { $regex: search, $options: 'i' } },
-      { description: { $regex: search, $options: 'i' } },
-      { location: { $regex: search, $options: 'i' } },
-      { country: { $regex: search, $options: 'i' } }
-    ]
-  });
-  
-  if (!listings.length) {
-    req.flash("error", "No listings found matching your search");
-    return res.redirect("/listings");
-  }
-  
-  res.render("listings/index.ejs", { allListings: listings });
-}
-
-module.exports.toggleLike = async (req, res) => {
-  const { id } = req.params;
-  const userId = req.user._id;
-  const listing = await Listing.findById(id);
-
-  const likeIndex = listing.likes.indexOf(userId);
-  if (likeIndex === -1) {
-    // User hasn't liked the listing yet, add the like
-    listing.likes.push(userId);
-  } else {
-    // User has already liked, remove the like
-    listing.likes.splice(likeIndex, 1);
-  }
-
-  await listing.save();
-  res.json({ likes: listing.likes.length, isLiked: likeIndex === -1 });
+    const { search } = req.query;
+    if (!search) {
+        req.flash("error", "Please enter a search term");
+        return res.redirect("/listings");
+    }
+    
+    // Search in title, description, location, and country
+    const listings = await Listing.find({
+        $or: [
+            { title: { $regex: search, $options: 'i' } },
+            { description: { $regex: search, $options: 'i' } },
+            { location: { $regex: search, $options: 'i' } },
+            { country: { $regex: search, $options: 'i' } }
+        ]
+    });
+    
+    if (!listings.length) {
+        req.flash("error", "No listings found matching your search");
+        return res.redirect("/listings");
+    }
+    
+    res.render("listings/index.ejs", { allListings: listings });
 }

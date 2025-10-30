@@ -10,8 +10,8 @@ cloudinary.config({
 const storage = new CloudinaryStorage({
     cloudinary: cloudinary,
     params: {
-    folder: 'Homify_DEV',
-    allowedFormats: ['jpeg', 'png', 'jpg','gif','pdf'],
+    folder: 'DreamNest_DEV',
+    allowedFormats: ['jpeg', 'png', 'jpg','gif','pdf','webp'],
     },
   });
 

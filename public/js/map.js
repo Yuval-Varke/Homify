@@ -1,43 +1,24 @@
 mapboxgl.accessToken = mapToken;
 
 
-const defaultCoordinates = [78.9629, 20.5937];
-
-
-const coordinates = listing.geometry && listing.geometry.coordinates 
-    ? listing.geometry.coordinates 
-    : defaultCoordinates;
+const coords = listing.geometry.coordinates; // Use as-is
 
 const map = new mapboxgl.Map({
     container: 'map',
     style: 'mapbox://styles/mapbox/streets-v11',
-    center: coordinates,
-    zoom: 12 
+    center: coords,
+    zoom: 12
 });
 
-
-map.addControl(new mapboxgl.NavigationControl());
-
-
-const marker = new mapboxgl.Marker({
-    color: "#FF385C",
-    scale: 1.2
-})
-.setLngLat(coordinates)
-.addTo(map);
-
-
-const popup = new mapboxgl.Popup({ offset: 25 })
-    .setHTML(`<h6>${listing.title}</h6><p>${listing.location}</p>`);
-
-marker.setPopup(popup);
-
+const marker1 = new mapboxgl.Marker({color: "blue"})
+    .setLngLat(coords)
+    .addTo(map);
 
 map.on('load', () => {
     map.resize();
     map.flyTo({
-        center: coordinates,
-        zoom: 10,
+        center: coords,
+        zoom: 12,
         essential: true
     });
 });

@@ -103,25 +103,22 @@ document.addEventListener('DOMContentLoaded', function() {
           <img src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80" class="show-img w-100" alt="Default House Image">
         <% } %>
         <div class="card-body">
-          <h2 class="mb-3"><%= listing.title %></h2>
+          <h2 class="mb-3 text-center"><strong><%= listing.title %></strong></h2>
           
           <div class="owner-info">
             <i class="fas fa-user"></i>
             <b>Owner: <%= listing.owner.username %></b>
             <% if(currUser && !currUser._id.equals(listing.owner._id)) { %>
-              <button class="like-btn" data-listing-id="<%= listing._id %>">
-                <i class="fas fa-heart <%= listing.likes.includes(currUser._id) ? 'liked' : '' %>"></i>
-                <span class="like-count"><%= listing.likes.length %></span>
-              </button>
+              <!-- Like button removed as likes are only on index page -->
             <% } %>
           </div>
 
           <div class="price-tag">
-            ₹<%= listing.price %> <span>per month</span>
+            ₹<%= listing.price.toLocaleString("en-IN") %> <span> /Night</span>
           </div>
 
           <div class="description">
-            <h5>Description</h5>
+            <h5><b>Description:</b></h5>
             <p><%= listing.description %></p>
           </div>
 
@@ -404,6 +401,10 @@ document.addEventListener('DOMContentLoaded', function() {
     margin-top: 2rem;
   }
 
+  [data-theme="dark"] .form-label {
+    color: #fff;
+  }
+
   .reviews-list h5 {
     color: var(--text-color);
     margin-bottom: 1.5rem;
@@ -478,5 +479,3 @@ document.addEventListener('DOMContentLoaded', function() {
     fill: var(--text-color) !important;
   }
 </style>
-
-
